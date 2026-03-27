@@ -2,7 +2,7 @@ package main
 
 // Arguments to format are: [1]: type name
 const valueMethod = `func (i %[1]s) Value() (driver.Value, error) {
-	return i.String(), nil
+	return int32(i), nil
 }
 `
 
@@ -11,25 +11,33 @@ const scanMethod = `func (i *%[1]s) Scan(value interface{}) error {
 		return nil
 	}
 
-	var str string
+	var val int64
+	var err error
+
 	switch v := value.(type) {
+	case int64:
+		val = v
+	case int32:
+        val = int64(v)
 	case []byte:
-		str = string(v)
+		val, err = strconv.ParseInt(string(v), 10, 32)
+		if err != nil {
+			return fmt.Errorf("cannot scan '%%v' into int32: %%w", value, err)
+		}
 	case string:
-		str = v
-	case fmt.Stringer:
-		str = v.String()
+		val, err = strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return fmt.Errorf("cannot scan '%%v' into int32: %%w", value, err)
+		}
 	default:
 		return fmt.Errorf("invalid value of %[1]s: %%[1]T(%%[1]v)", value)
 	}
 
-	val, err := %[1]sString(str)
-	if err != nil {
-		return err
+	if v:=%[1]s(int32(val)); v.IsA%[1]s() {
+		*i = v
 	}
 
-	*i = val
-	return nil
+	return fmt.Errorf("unknown %[1]s type")
 }
 `
 
