@@ -52,6 +52,10 @@ var goldenGQLGen = []Golden{
 	{"primeGQLGen", primeGQLGenIn},
 }
 
+var goldenIntGQLGen = []Golden{
+	{"primeIntSql", primeGQLGenIn},
+}
+
 var goldenJSONAndSQL = []Golden{
 	{"primeJsonAndSql", primeJsonAndSqlIn},
 }
@@ -374,6 +378,12 @@ func TestGolden(t *testing.T) {
 	for _, test := range goldenGQLGen {
 		runGoldenTest(t, test, generateOptions{
 			includeGQLGen:   true,
+			transformMethod: "noop",
+		})
+	}
+	for _, test := range goldenIntGQLGen {
+		runGoldenTest(t, test, generateOptions{
+			includeIntSQL:   true,
 			transformMethod: "noop",
 		})
 	}

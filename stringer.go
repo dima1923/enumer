@@ -47,6 +47,7 @@ type generateOptions struct {
 	includeJSON         bool
 	includeYAML         bool
 	includeSQL          bool
+	includeIntSQL       bool
 	includeText         bool
 	includeGQLGen       bool
 	transformMethod     string
@@ -70,6 +71,7 @@ func init() {
 	flag.StringVar(&typeNames, "type", "", "comma-separated list of type names; must be set")
 
 	flag.BoolVar(&opts.includeSQL, "sql", false, "if true, the Scanner and Valuer interface will be implemented.")
+	flag.BoolVar(&opts.includeIntSQL, "intsql", false, "if true, the Scanner and Valuer interface will be implemented with storing as integer")
 	flag.BoolVar(&opts.includeJSON, "json", false, "if true, json marshaling methods will be generated. Default: false")
 	flag.BoolVar(&opts.includeYAML, "yaml", false, "if true, yaml marshaling methods will be generated. Default: false")
 	flag.BoolVar(&opts.includeText, "text", false, "if true, text marshaling methods will be generated. Default: false")
@@ -148,8 +150,11 @@ func main() {
 	}
 	g.Printf("\t\"fmt\"\n")
 	g.Printf("\t\"strings\"\n")
-	if opts.includeSQL {
+	if opts.includeSQL || opts.includeIntSQL {
 		g.Printf("\t\"database/sql/driver\"\n")
+	}
+	if opts.includeIntSQL {
+		g.Printf("\t\"strconv\"\n")
 	}
 	if opts.includeJSON {
 		g.Printf("\t\"encoding/json\"\n")
@@ -505,6 +510,9 @@ func (g *Generator) generate(typeName string, opts generateOptions) {
 	}
 	if opts.includeSQL {
 		g.addValueAndScanMethod(typeName)
+	}
+	if opts.includeIntSQL {
+		g.addIntValueAndScanMethod(typeName)
 	}
 	if opts.includeGQLGen {
 		g.buildGQLGenMethods(runs, typeName)
